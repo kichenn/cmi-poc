@@ -1,0 +1,7 @@
+server:
+  port: 9001
+external:
+  parser:
+    url: http://172.16.101.142:10999/tde/usp/parse
+dialoguePre: 入住时间？
+dialogueBeh: 离店时间？
