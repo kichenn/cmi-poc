@@ -6,11 +6,9 @@ external:
 dialoguePre: 入住时间？
 dialogueBeh: 离店时间？
 spring:
-  data:
-    elasticsearch:
-      #cluster-name: #默认为elasticsearch
-      cluster-nodes: 127.0.0.1:9300 #配置es节点信息，逗号分隔，如果没有指定，则启动ClientNode（9200端口是http查询使用的。9300集群使用。这里使用9300.）
-      properties:
-        path:
-          logs: ./elasticsearch/log #elasticsearch日志存储目录
-          data: ./elasticsearch/data #elasticsearch数据存储目录
+  elasticsearch:
+    rest:
+     uris: http://172.16.102.120:9200
+     username: elastic
+     password: zGGKZUG4D34gdwkyPCtXCd4KU56b2XtA
+
