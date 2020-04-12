@@ -3,6 +3,7 @@ package com.emotibot.cmiparser.entity.dto;
 import com.emotibot.cmiparser.entity.bo.PriceParserBo;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.scheduling.support.SimpleTriggerContext;
 
 import java.util.Date;
 import java.util.List;
@@ -18,4 +19,9 @@ public class UserCache {
     private Date checkoutTime;
     private PriceParserBo priceParserBo;
     private List<String> hotelStars;
+    private String specials;
+    private String ccity;
+    private String district;
+    private String hotelName;
+    private String roomType;
 }
