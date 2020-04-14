@@ -3,8 +3,8 @@ server:
 external:
   parser:
     url: http://172.16.101.142:10999/tde/usp/parse
-dialoguePre: 入住时间？
-dialogueBeh: 离店时间？
+dialoguePre: ${DIALOGUEPRE:您打算什么时候入住？}
+dialogueBeh: ${DIALOGUEPRE:您打算什么时候离开？}
 spring:
   elasticsearch:
     rest:

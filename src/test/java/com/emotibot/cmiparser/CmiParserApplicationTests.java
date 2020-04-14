@@ -1,6 +1,8 @@
 package com.emotibot.cmiparser;
 
 import com.alibaba.fastjson.JSONObject;
+import com.emotibot.cmiparser.util.HotelStarUnit;
+import com.emotibot.cmiparser.util.ParserUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -18,6 +20,7 @@ class CmiParserApplicationTests {
 //
 //        JSONObject heihei = haha.getJSONObject("heihei");
 //        System.out.println(heihei);
+//        ParserUtils.hotelStarParse(null);
 
     }
 

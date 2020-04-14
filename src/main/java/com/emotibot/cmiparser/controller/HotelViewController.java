@@ -3,23 +3,34 @@ package com.emotibot.cmiparser.controller;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.emotibot.cmiparser.access.HotelRepository;
+import com.emotibot.cmiparser.common.BaseResult;
+import com.emotibot.cmiparser.entity.bo.PriceParserBo;
+import com.emotibot.cmiparser.entity.dto.Answer;
+import com.emotibot.cmiparser.entity.dto.HotelCard;
+import com.emotibot.cmiparser.entity.dto.SkillResponse;
 import com.emotibot.cmiparser.entity.dto.UserCache;
-import com.emotibot.cmiparser.entity.po.Employee;
 import com.emotibot.cmiparser.entity.po.HotelEntity;
+import com.emotibot.cmiparser.entity.po.Kw;
+import com.emotibot.cmiparser.entity.po.Myfloat;
+import com.emotibot.cmiparser.service.HotelViewService;
 import com.emotibot.cmiparser.util.ParserUtils;
+import com.emotibot.cmiparser.util.PreHandlingUnit;
 import com.google.common.cache.LoadingCache;
+import com.sun.org.apache.xpath.internal.operations.Bool;
+import io.netty.handler.codec.json.JsonObjectDecoder;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
+import org.apache.lucene.search.join.ScoreMode;
+import org.elasticsearch.index.query.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.concurrent.ExecutionException;
+import javax.management.relation.RelationSupport;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -31,41 +42,103 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/cmi", produces = "application/json;charset=UTF-8")
 public class HotelViewController {
     @Autowired
-    private LoadingCache<String, UserCache> innerCache;
+    private HotelViewService hotelViewService;
     @Autowired
-    private HotelRepository hotelRepository;
+    private LoadingCache<String, UserCache> innerCache;
 
     @PostMapping("/hotelView")
-    public Object hotelView(@RequestBody JSONObject generalInfo){
+    public SkillResponse hotelView(@RequestBody JSONObject slotInfo) {
         try {
-            //System.out.println(generalInfo);
-            log.info("hotelView request: "+generalInfo);
-
-            String userId = ParserUtils.getUserId(generalInfo);
-//            UserCache userCache = innerCache.get(userId);
-
-//            MatchQueryBuilder matchQueryBuilder = QueryBuilders.matchQuery("first_name", "Jane");
-//
-////        List<String> properties = new ArrayList<>();
-////        Sort sort = Sort.by(Sort.Direction.DESC,"createDate");//排序
-//
-//            //多条件排序
-////    Sort.Order order1 = new Sort.Order(Sort.Direction.DESC,"userId");
-////    Sort.Order order2 = new Sort.Order(Sort.Direction.ASC,"userId");
-////    Sort sortList = Sort.by(order1,order2);
-//
-//            //Pageable pageable = PageRequest.of(0, 10, sort);
-//            Page<Employee> search = employeeRepository.search(matchQueryBuilder, pageable);
-//            List<Employee> collect = search.get().collect(Collectors.toList());
-//            System.out.println(collect);
-            Iterable<HotelEntity> all = hotelRepository.findAll();
-            all.forEach(System.out::println);
-
-
+            log.info("hotelView request: " + slotInfo);
+            String userId = slotInfo.getString("userId");
+            getSlotInfo(slotInfo);
+            SkillResponse result = viewHandler(hotelViewService.hotelView(userId),userId);
+            logRes(slotInfo,result);
+            return result;
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        return generalInfo;
+        return null;
     }
+
+    private SkillResponse viewHandler(List<HotelEntity> hotelView,String userId) throws Exception{
+        if(hotelView == null) {
+            return null;
+        }
+        ArrayList<HotelCard> hotelCards = new ArrayList<>();
+        for (HotelEntity hotelEntity : hotelView) {
+            String roomType = innerCache.get(userId).getRoomType();
+            HotelCard hotelCard = HotelCard.build(hotelEntity, roomType);
+            hotelCards.add(hotelCard);
+        }
+
+        return SkillResponse.builder().type("card")
+                .subType("text")
+                .data(hotelCards)
+//                .userId(userId)
+                .build();
+    }
+
+
+    private void getSlotInfo(JSONObject slotInfo) {
+        try {
+//            String userId = ParserUtils.getUserId(generalInfo);
+//            JSONArray jsonArray = generalInfo.getJSONObject("cu").getJSONArray("wordPos");
+//            int size = jsonArray.size();
+//            for (int i = 0; i < size; i++) {
+//                JSONObject jsonObject = jsonArray.getJSONObject(i);
+//                if (jsonObject.get("word") != null) {
+//
+//                    if (jsonObject.getString("word").equals("hotelName")) {
+//                        innerCache.get(userId).setHotelName(jsonObject.getString("orgWord"));
+//                    }
+//                    if (jsonObject.getString("word").equals("roomType")) {
+//                        innerCache.get(userId).setRoomType(jsonObject.getString("orgWord"));
+//                    }
+//                    if (jsonObject.getString("word").equals("district")) {
+//                        innerCache.get(userId).setDistrict(jsonObject.getString("orgWord"));
+//                    }
+//                    if (jsonObject.getString("word").equals("ccity")) {
+//                        innerCache.get(userId).setCcity(jsonObject.getString("orgWord"));
+//                    }
+//                    if (jsonObject.getString("word").equals("specials")) {
+//                        innerCache.get(userId).setSpecials(jsonObject.getString("orgWord"));
+//                    }
+//
+//                }
+
+            String userId = slotInfo.getString("userId");
+
+            if (slotInfo.get("hotelName") != null) {
+                innerCache.get(userId).setHotelName(slotInfo.getString("hotelName"));
+            }
+            if (slotInfo.get("roomType") != null) {
+                innerCache.get(userId).setRoomType(slotInfo.getString("roomType"));
+            }
+            if (slotInfo.get("district") != null) {
+                innerCache.get(userId).setDistrict(slotInfo.getString("district"));
+            }
+            if (slotInfo.get("ccity") != null) {
+                innerCache.get(userId).setCcity(slotInfo.getString("ccity"));
+            }
+            if (slotInfo.get("specials") != null) {
+                innerCache.get(userId).setSpecials(slotInfo.getString("specials"));
+
+
+            }
+        } catch (Exception e) {
+//            e.printStackTrace();
+        }
+    }
+
+
+    private void logRes(JSONObject slotInfo, Object result) {
+        log.info("response: " + result);
+        try {
+            log.info("userCache: " + innerCache.get(slotInfo.getString("userId")));
+        } catch (Exception e) {
+//            e.printStackTrace();
+        }
+    }
+
 }

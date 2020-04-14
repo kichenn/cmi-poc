@@ -43,7 +43,7 @@ public class CheckinService {
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             TimeConvertBo timeConvertBo = externalParser.timeParse(text);
             if (timeConvertBo == null) {
-                return null;
+                return BaseResult.ok();
             }
 
             /*槽位转换逻辑*/

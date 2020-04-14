@@ -135,4 +135,30 @@ public class ExternalParser {
     }
 
 
+
+    public String selectParse(String text,List<String> hotelList) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HotelStarReq body = new HotelStarReq(hotelList);
+        body.setQuery(text);
+        HttpEntity<HotelStarReq> entity = new HttpEntity<>(body, headers);
+        JSONObject result = restTemplate.postForObject(parserUrl, entity, JSONObject.class);
+
+        try {
+            JSONArray jsonArray = result.getJSONArray("informs")
+                    .getJSONObject(0)
+                    .getJSONObject("value")
+                    .getJSONObject("option")
+                    .getJSONArray("selects");
+
+            List<String> selects = jsonArray.stream().map(e -> (String) e).collect(Collectors.toList());
+            return selects.get(0);
+        } catch (Exception e) {
+//            e.printStackTrace();
+            return null;
+        }
+
+    }
+
+
 }

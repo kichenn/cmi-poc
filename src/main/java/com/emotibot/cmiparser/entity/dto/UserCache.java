@@ -1,6 +1,7 @@
 package com.emotibot.cmiparser.entity.dto;
 
 import com.emotibot.cmiparser.entity.bo.PriceParserBo;
+import com.emotibot.cmiparser.entity.po.HotelEntity;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.scheduling.support.SimpleTriggerContext;
@@ -24,4 +25,9 @@ public class UserCache {
     private String district;
     private String hotelName;
     private String roomType;
+
+    private List<HotelEntity> hotels;
+
+
+
 }
