@@ -3,6 +3,7 @@ server:
 external:
   parser:
     url: http://172.16.101.142:10999/tde/usp/parse
+  snlu: http://172.16.102.120:13901
 dialoguePre: ${DIALOGUEPRE:您打算什么时候入住？}
 dialogueBeh: ${DIALOGUEPRE:您打算什么时候离开？}
 spring:
@@ -11,4 +12,5 @@ spring:
      uris: http://172.16.102.120:9200
      username: elastic
      password: zGGKZUG4D34gdwkyPCtXCd4KU56b2XtA
+
 

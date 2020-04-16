@@ -60,8 +60,13 @@ public class SelectService {
             }else {
                 //有userId 正常对话
                 signUp(userId);
-                hotelList = innerCache.get(userId).getHotels().stream().map(e -> e.getEntity()).collect(Collectors.toList());
+                List<String> hotelListTmp = innerCache.get(userId).getHotels().stream().map(e -> e.getEntity()).collect(Collectors.toList());
+
+                //对酒店列表做分词处理   "香港喜来登酒店" -> "香港喜来登酒店|香港|喜来登|酒店"
+                hotelList = hotelListTmp.stream().map(externalParser::snluParse).collect(Collectors.toList());
+
                 String selectedHotelName = externalParser.selectParse(text, hotelList);
+
                 if(StringUtils.isEmpty(selectedHotelName)){
                     return BaseResult.ok();
                 }
@@ -109,9 +114,9 @@ public class SelectService {
             +"，离店时间是"+dateFormatFormat.format(userCache.getCheckoutTime());
 
             //清除此次会话缓存
-            if(!StringUtils.isEmpty(slotValue)){
+           /* if(!StringUtils.isEmpty(slotValue)){
                 innerCache.put(userId,UserCache.builder().build());
-            }
+            }*/
             return BaseResult.ok(SlotResponse.build(slotName, slotValue));
         }
 

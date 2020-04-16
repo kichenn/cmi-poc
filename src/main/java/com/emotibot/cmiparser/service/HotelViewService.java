@@ -26,10 +26,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.lang.reflect.Array;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -68,20 +66,54 @@ public class HotelViewService {
 ////                    .district("尖沙咀")
 //                    .build();
 
-            signUp(userId);
+
             UserCache userCache = innerCache.get(userId);
 
-            List<HotelEntity> collect = null;
+            List<HotelEntity> collect = new ArrayList<>();
 
             /**
              * 直接指定酒店名称
              */
-            if (userCache.getHotelName() != null) {
+            if (!StringUtils.isEmpty(userCache.getHotelName())) {
                 Pageable pageable = PageRequest.of(0, 1);
                 MatchPhraseQueryBuilder queryEntity = QueryBuilders.matchPhraseQuery("entity", userCache.getHotelName());
                 Page<HotelEntity> search = hotelRepository.search(queryEntity, pageable);
                 HotelEntity hotelEntity = search.get().findAny().get();
                 if (hotelEntity != null) {
+                    List<Kw> r_kw = hotelEntity.getR_kw();
+                    ArrayList<String> roomTypeHotel = new ArrayList<>();
+                    r_kw.stream().forEach(e->{
+                        if(e.getAttr().equals("包含"))  roomTypeHotel.add(e.getValue());
+                    });
+
+                    if (!CollectionUtils.isEmpty(roomTypeHotel)) {
+                        for (String s : roomTypeHotel) {
+                            if(s.contains(userCache.getRoomType())) {
+                                Optional<String> first = null;
+                                try {
+                                    first = roomTypeHotel.stream().filter(e -> e.contains(userCache.getRoomType())).findFirst();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                if (first.isPresent()) {
+                                    String sonHotelName = first.get();
+                                    MatchPhraseQueryBuilder queryEntity2 = QueryBuilders.matchPhraseQuery("entity", sonHotelName);
+                                    Page<HotelEntity> search2 = hotelRepository.search(queryEntity2, pageable);
+                                    HotelEntity hotelEntity2 = search2.get().findAny().get();
+
+                                    hotelEntity2.getR_text().stream().forEach(em -> {
+                                        if (em.getAttr().equals("面积")) hotelEntity.setRoomArea(em.getValue());
+                                    });
+                                    hotelEntity2.getR_float().stream().forEach(en -> {
+                                        if (en.getAttr().equals("单晚价格")) hotelEntity.setCurrentPrice(en.getValue());
+                                    });
+                                }
+                                break;
+                            }
+                        }
+
+                    }
+
                     collect.add(hotelEntity);
                     innerCache.get(userId).setHotels(collect);
                     return collect;
@@ -137,10 +169,10 @@ public class HotelViewService {
                 search.forEach(hotelEntities2::add);
             }
 
-            if(!CollectionUtils.isEmpty(hotelEntities1) && !CollectionUtils.isEmpty(hotelEntities2)) {
+            if (!CollectionUtils.isEmpty(hotelEntities1) && !CollectionUtils.isEmpty(hotelEntities2)) {
                 hotelEntities1.retainAll(hotelEntities2);
-            }else{
-                if(!CollectionUtils.isEmpty(hotelEntities2)) {
+            } else {
+                if (!CollectionUtils.isEmpty(hotelEntities2)) {
                     hotelEntities1 = hotelEntities2;
                 }
             }

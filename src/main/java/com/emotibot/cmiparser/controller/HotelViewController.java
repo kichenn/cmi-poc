@@ -15,6 +15,7 @@ import com.emotibot.cmiparser.entity.po.Myfloat;
 import com.emotibot.cmiparser.service.HotelViewService;
 import com.emotibot.cmiparser.util.ParserUtils;
 import com.emotibot.cmiparser.util.PreHandlingUnit;
+import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 import io.netty.handler.codec.json.JsonObjectDecoder;
@@ -49,8 +50,9 @@ public class HotelViewController {
     @PostMapping("/hotelView")
     public SkillResponse hotelView(@RequestBody JSONObject slotInfo) {
         try {
-            log.info("hotelView request: " + slotInfo);
             String userId = slotInfo.getString("userId");
+            signUp(userId);
+            log.info("userId:" + userId+"--hotelViewReq:"+slotInfo);
             getSlotInfo(slotInfo);
             SkillResponse result = viewHandler(hotelViewService.hotelView(userId),userId);
             logRes(slotInfo,result);
@@ -82,30 +84,6 @@ public class HotelViewController {
 
     private void getSlotInfo(JSONObject slotInfo) {
         try {
-//            String userId = ParserUtils.getUserId(generalInfo);
-//            JSONArray jsonArray = generalInfo.getJSONObject("cu").getJSONArray("wordPos");
-//            int size = jsonArray.size();
-//            for (int i = 0; i < size; i++) {
-//                JSONObject jsonObject = jsonArray.getJSONObject(i);
-//                if (jsonObject.get("word") != null) {
-//
-//                    if (jsonObject.getString("word").equals("hotelName")) {
-//                        innerCache.get(userId).setHotelName(jsonObject.getString("orgWord"));
-//                    }
-//                    if (jsonObject.getString("word").equals("roomType")) {
-//                        innerCache.get(userId).setRoomType(jsonObject.getString("orgWord"));
-//                    }
-//                    if (jsonObject.getString("word").equals("district")) {
-//                        innerCache.get(userId).setDistrict(jsonObject.getString("orgWord"));
-//                    }
-//                    if (jsonObject.getString("word").equals("ccity")) {
-//                        innerCache.get(userId).setCcity(jsonObject.getString("orgWord"));
-//                    }
-//                    if (jsonObject.getString("word").equals("specials")) {
-//                        innerCache.get(userId).setSpecials(jsonObject.getString("orgWord"));
-//                    }
-//
-//                }
 
             String userId = slotInfo.getString("userId");
 
@@ -132,12 +110,23 @@ public class HotelViewController {
     }
 
 
-    private void logRes(JSONObject slotInfo, Object result) {
-        log.info("response: " + result);
+    private void logRes(JSONObject generalInfo, Object result) {
+        log.info("response:" + result);
         try {
-            log.info("userCache: " + innerCache.get(slotInfo.getString("userId")));
+            log.info("userId:"+ParserUtils.getUserId(generalInfo)+"--userCache: " + innerCache.get(ParserUtils.getUserId(generalInfo)));
         } catch (Exception e) {
 //            e.printStackTrace();
+            log.debug(e.getMessage());
+        }
+    }
+
+    private void signUp(String userId) {
+        try {
+            innerCache.get(userId);
+        } catch (Exception e) {
+            if (e instanceof CacheLoader.InvalidCacheLoadException) {
+                innerCache.put(userId, UserCache.builder().build());
+            }
         }
     }
 

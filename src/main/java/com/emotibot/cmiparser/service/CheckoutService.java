@@ -82,9 +82,12 @@ public class CheckoutService {
             /*如有userID,存缓存*/
             if(userId != null && checkoutTime != null) {
                 innerCache.get(userId).setCheckoutTime(checkoutTime);
+                return updateSlot("checkoutTi",checkoutTime);
+            }else {
+                return BaseResult.ok();
             }
 
-            return updateSlot("checkoutTi",checkoutTime);
+
 
         } catch (Exception e) {
             return BaseResult.ok();

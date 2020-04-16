@@ -18,8 +18,4 @@ public class testController {
         return "haha";
     }
 
-    @PostMapping("/testSlot")
-    public Object haha2() {
-        return BaseResult.ok(SlotResponse.build("haha", "heihei"));
-    }
 }

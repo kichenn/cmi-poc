@@ -26,6 +26,8 @@ public class ExternalParser {
 
     @Value("${external.parser.url}")
     private String parserUrl;
+    @Value("${external.snlu}")
+    private String snluParseUrl;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -156,6 +158,34 @@ public class ExternalParser {
         } catch (Exception e) {
 //            e.printStackTrace();
             return null;
+        }
+
+    }
+
+    /**
+     * 外部分词处理
+     * @param question
+     * @return
+     */
+    public String snluParse(String question) {
+
+        JSONArray result = restTemplate.getForObject(snluParseUrl + "?f=segment&q=" + question, JSONArray.class);
+        String answer = question;
+
+        try {
+
+            JSONArray segment = result.getJSONObject(0).getJSONArray("segment");
+            int size = segment.size();
+            for (int i = 0; i < size; i++) {
+                JSONObject jsonObject = segment.getJSONObject(i);
+                String word = jsonObject.getString("word");
+                answer = answer+"|"+word;
+            }
+
+            return answer;
+        } catch (Exception e) {
+//            e.printStackTrace();
+            return answer;
         }
 
     }

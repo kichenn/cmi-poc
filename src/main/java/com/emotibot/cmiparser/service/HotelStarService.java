@@ -33,12 +33,15 @@ public class HotelStarService {
             signUp(userId);
 
             String text = generalInfo.getString("text");
-
-            List<String> selects = externalParser.hotelStarParse(text);
-            if(userId!=null && selects != null){
-                innerCache.get(userId).setHotelStars(selects);
+            if(text.contains("星")) {
+                List<String> selects = externalParser.hotelStarParse(text);
+                if (userId != null && selects != null) {
+                    innerCache.get(userId).setHotelStars(selects);
+                    return updateSlot("hotelStar", selects);
+                }
             }
-            return updateSlot("hotelStar", selects);
+
+            return BaseResult.ok();
         } catch (ExecutionException e) {
 //            e.printStackTrace();
             return BaseResult.ok();

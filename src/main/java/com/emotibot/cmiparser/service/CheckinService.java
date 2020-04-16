@@ -72,9 +72,12 @@ public class CheckinService {
             /*如有userID,存缓存*/
             if (userId != null && checkinTime != null) {
                 innerCache.get(userId).setCheckinTime(checkinTime);
+                return updateSlot("checkinTi", checkinTime);
+            }else {
+                return BaseResult.ok();
             }
 
-            return updateSlot("checkinTi", checkinTime);
+
 
         } catch (Exception e) {
             return BaseResult.ok();

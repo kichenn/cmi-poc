@@ -40,7 +40,7 @@ public class ParserController {
 
     @PostMapping("/parser/checkinTime")
     public BaseResult checkinParser(@RequestBody JSONObject generalInfo) {
-        logReq(generalInfo, "checkinTime");
+        log.info("userId:" + ParserUtils.getUserId(generalInfo)+"--checkinTimeReq:"+generalInfo);
         BaseResult response = checkinService.parse(generalInfo);
         logRes(generalInfo, response);
         return response;
@@ -48,25 +48,26 @@ public class ParserController {
 
     @PostMapping("/parser/checkoutTime")
     public BaseResult checkoutParser(@RequestBody JSONObject generalInfo) {
-        logReq(generalInfo, "checkoutTime");
+        log.info("userId:" + ParserUtils.getUserId(generalInfo)+"--checkoutTimeReq:"+generalInfo);
         BaseResult response = checkoutService.parse(generalInfo);
         logRes(generalInfo, response);
-
         return response;
     }
 
     @PostMapping("/parser/price")
     public BaseResult priceParser(@RequestBody JSONObject generalInfo) {
-        logReq(generalInfo, "price");
+        log.info("userId:" + ParserUtils.getUserId(generalInfo)+"--priceReq:"+generalInfo);
         BaseResult response = priceService.parse(generalInfo);
         logRes(generalInfo, response);
-
         return response;
     }
 
     @PostMapping("/parser/hotelStar")
     public BaseResult hotelStarParser(@RequestBody JSONObject generalInfo) {
-        logReq(generalInfo, "hotelStar");
+//        if(generalInfo.getJSONObject("task_info").getString("Intent").equals("列表选择节点")) {
+//            return BaseResult.ok();
+//        }
+        log.info("userId:" + ParserUtils.getUserId(generalInfo)+"--hotelStarReq:"+generalInfo);
         BaseResult response = hotelStarService.parse(generalInfo);
         logRes(generalInfo, response);
         return response;
@@ -74,35 +75,20 @@ public class ParserController {
 
     @PostMapping("/parser/selectParse")
     public BaseResult selectParser(@RequestBody JSONObject generalInfo) {
-        logReq(generalInfo, "selectParse");
+        log.info("userId:" + ParserUtils.getUserId(generalInfo)+"--selectParseReq:"+generalInfo);
         BaseResult response = selectService.parse(generalInfo);
-//        logRes(generalInfo, response);
-
-
-        log.info("selectParse response: " + response);
-        try {
-            log.info("selectParse userCache: " + innerCache.get(ParserUtils.getUserId(generalInfo)));
-        } catch (Exception e) {
-//            e.printStackTrace();
-        }
-
-
+        logRes(generalInfo, response);
         return response;
-
     }
 
-
-    private void logReq(JSONObject generalInfo, String inf) {
-        log.info("interface: " + inf + "--" + generalInfo.toString());
-        log.info("userId: " + ParserUtils.getUserId(generalInfo));
-    }
 
     private void logRes(JSONObject generalInfo, Object result) {
-        log.info("response: " + result);
+        log.info("response:" + result);
         try {
-            log.info("userId: "+ParserUtils.getUserId(generalInfo)+"userCache: " + innerCache.get(ParserUtils.getUserId(generalInfo)));
+            log.info("userId:"+ParserUtils.getUserId(generalInfo)+"--userCache: " + innerCache.get(ParserUtils.getUserId(generalInfo)));
         } catch (Exception e) {
 //            e.printStackTrace();
+            log.debug(e.getMessage());
         }
     }
 
