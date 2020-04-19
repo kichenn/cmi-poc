@@ -30,7 +30,7 @@ public class MyCacheConfiguration {
                                 }
                             });
         } catch (Exception e) {
-//            e.printStackTrace();
+            e.printStackTrace();
         }
         return null;
     }

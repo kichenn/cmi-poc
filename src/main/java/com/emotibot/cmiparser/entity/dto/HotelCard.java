@@ -1,13 +1,8 @@
 package com.emotibot.cmiparser.entity.dto;
 
 import com.emotibot.cmiparser.entity.po.HotelEntity;
-import lombok.Builder;
 import lombok.Data;
 
-/**
- * @Author: zujikang
- * @Date: 2020/4/13 15:26
- */
 @Data
 public class HotelCard {
     private String specials;
@@ -44,8 +39,6 @@ public class HotelCard {
                 hotelCard.setProfile(e.getValue());
             }
         });
-
-//        hotelCard.setProfile("https://i04piccdn.sogoucdn.com/cee0ac956db6df07");
 
         hotelCard.setRoomType(roomType);
         hotelCard.setRoomArea(hotelEntity.getRoomArea());

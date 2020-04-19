@@ -2,48 +2,34 @@ package com.emotibot.cmiparser.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.emotibot.cmiparser.access.ExternalParser;
-import com.emotibot.cmiparser.common.BaseResult;
+import com.emotibot.cmiparser.entity.dto.BaseResult;
 import com.emotibot.cmiparser.entity.dto.SlotResponse;
-import com.emotibot.cmiparser.entity.dto.UserCache;
-import com.emotibot.cmiparser.util.ParserUtils;
-import com.fasterxml.jackson.databind.ser.Serializers;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
-/**
- * @Author: zujikang
- * @Date: 2020-04-10 12:41
- */
 @Service
+@Slf4j
 public class HotelStarService {
-    @Autowired
-    private LoadingCache<String, UserCache> innerCache;
     @Autowired
     private ExternalParser externalParser;
 
     public BaseResult parse(JSONObject generalInfo){
         try {
-            String userId = ParserUtils.getUserId(generalInfo);
-            signUp(userId);
 
             String text = generalInfo.getString("text");
             if(text.contains("星")) {
                 List<String> selects = externalParser.hotelStarParse(text);
-                if (userId != null && selects != null) {
-                    innerCache.get(userId).setHotelStars(selects);
+                if (selects != null) {
                     return updateSlot("hotelStar", selects);
                 }
             }
 
             return BaseResult.ok();
-        } catch (ExecutionException e) {
-//            e.printStackTrace();
+        } catch (Exception e) {
+            log.error(e.getMessage());
             return BaseResult.ok();
         }
 
@@ -53,17 +39,10 @@ public class HotelStarService {
         if(selects==null) {
             return BaseResult.ok();
         }else {
+
             return BaseResult.ok(SlotResponse.build(slotName,String.join(",",selects)));
         }
     }
 
-    private void signUp(String userId) {
-        try {
-            innerCache.get(userId);
-        } catch (Exception e) {
-            if (e instanceof CacheLoader.InvalidCacheLoadException) {
-                innerCache.put(userId, UserCache.builder().build());
-            }
-        }
-    }
+
 }

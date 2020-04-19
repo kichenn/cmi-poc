@@ -4,10 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * @Author: zujikang
- * @Date: 2020-04-09 13:53
- */
 @Data
 @Builder
 public class SlotResponse {

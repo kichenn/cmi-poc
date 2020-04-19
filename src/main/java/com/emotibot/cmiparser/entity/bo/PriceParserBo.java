@@ -5,10 +5,6 @@ import lombok.Data;
 
 import java.util.List;
 
-/**
- * @Author: zujikang
- * @Date: 2020-04-10 0:47
- */
 @Data
 @Builder
 public class PriceParserBo {

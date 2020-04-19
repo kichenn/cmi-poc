@@ -1,4 +1,4 @@
-package com.emotibot.cmiparser.common;
+package com.emotibot.cmiparser.entity.dto;
 
 import lombok.Builder;
 import lombok.Data;

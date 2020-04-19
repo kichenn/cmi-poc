@@ -3,13 +3,11 @@ package com.emotibot.cmiparser.service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.emotibot.cmiparser.access.ExternalParser;
-import com.emotibot.cmiparser.common.BaseResult;
 import com.emotibot.cmiparser.entity.bo.TimeConvertBo;
+import com.emotibot.cmiparser.entity.dto.BaseResult;
 import com.emotibot.cmiparser.entity.dto.SlotResponse;
-import com.emotibot.cmiparser.entity.dto.UserCache;
 import com.emotibot.cmiparser.util.ParserUtils;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,26 +18,17 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-/**
- * @Author: zujikang
- * @Date: 2020-04-10 18:21
- */
 @Service
+@Slf4j
 public class CheckoutService {
-    @Autowired
-    private LoadingCache<String, UserCache> innerCache;
     @Autowired
     private ExternalParser externalParser;
     @Value("${dialogueBeh}")
     private String dialogueBeh;
-    private DateFormat dateFormatFormat = new SimpleDateFormat("M月d日");
 
 
     public BaseResult parse(JSONObject generalInfo) {
         try {
-
-            String userId = ParserUtils.getUserId(generalInfo);
-            signUp(userId);
 
             String text = generalInfo.getString("text");
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -79,9 +68,7 @@ public class CheckoutService {
                 }
             }
 
-            /*如有userID,存缓存*/
-            if(userId != null && checkoutTime != null) {
-                innerCache.get(userId).setCheckoutTime(checkoutTime);
+            if(checkoutTime != null) {
                 return updateSlot("checkoutTi",checkoutTime);
             }else {
                 return BaseResult.ok();
@@ -90,25 +77,17 @@ public class CheckoutService {
 
 
         } catch (Exception e) {
+            log.error(e.getMessage());
             return BaseResult.ok();
         }
     }
 
-    private BaseResult updateSlot(String slotName, Date slotValue) {
+    private BaseResult updateSlot(String slotName, Date slotValue) throws Exception{
         if(slotValue != null) {
-            return BaseResult.ok(SlotResponse.build(slotName, dateFormatFormat.format(slotValue)));
+            return BaseResult.ok(SlotResponse.build(slotName, ParserUtils.format(slotValue)));
         }else {
             return BaseResult.ok();
         }
     }
 
-    private void signUp(String userId) {
-        try {
-            innerCache.get(userId);
-        } catch (Exception e) {
-            if (e instanceof CacheLoader.InvalidCacheLoadException) {
-                innerCache.put(userId, UserCache.builder().build());
-            }
-        }
-    }
 }

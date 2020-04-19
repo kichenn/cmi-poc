@@ -1,6 +1,4 @@
-package com.emotibot.cmiparser.common;
-
-import lombok.Data;
+package com.emotibot.cmiparser.entity.dto;
 
 /**
  * @Author: zujikang

@@ -10,10 +10,6 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.util.List;
 
-/**
- * @Author: zujikang
- * @Date: 2020-04-13 3:14
- */
 @Data
 @Document(indexName = "emotibot_kg_product", type = "emotibot_skg_type")
 public class HotelEntity implements Comparable<HotelEntity>{
@@ -48,12 +44,10 @@ public class HotelEntity implements Comparable<HotelEntity>{
 
     private String roomArea;
     private Double currentPrice;
-    /*@Field(type = FieldType.Nested)
-    private List<Object> r_date;
-    @Field(type = FieldType.Nested)
-    private List<Object> r_interval_float;
-    @Field(type = FieldType.Text)
-    private List<String> r_extra;*/
+
+    private String checkinTime;
+    private String checkoutTime;
+    private String roomType;
 
 
 

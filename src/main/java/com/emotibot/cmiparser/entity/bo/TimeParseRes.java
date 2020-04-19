@@ -5,10 +5,6 @@ import lombok.Data;
 
 import java.util.List;
 
-/**
- * @Author: zujikang
- * @Date: 2020-04-09 12:18
- */
 @Data
 public class TimeParseRes {
     private String actType;

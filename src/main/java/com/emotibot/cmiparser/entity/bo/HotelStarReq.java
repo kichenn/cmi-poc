@@ -5,10 +5,6 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @Author: zujikang
- * @Date: 2020-04-10 11:56
- */
 @Data
 public class HotelStarReq {
     private String id;

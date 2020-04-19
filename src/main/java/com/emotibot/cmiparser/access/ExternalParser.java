@@ -16,11 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
-/**
- * @Author: zujikang
- * @Date: 2020-04-09 10:28
- */
 @Component
 public class ExternalParser {
 
@@ -33,11 +28,8 @@ public class ExternalParser {
     private RestTemplate restTemplate;
 
     public TimeConvertBo timeParse(String text) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
         TimeParseReq body = TimeParseReq.builder().id("chrono").query(text).build();
-        HttpEntity<TimeParseReq> entity = new HttpEntity<>(body, headers);
-        JSONObject result = restTemplate.postForObject(parserUrl, entity, JSONObject.class);
+        JSONObject result = doPost(parserUrl, body);
 
         try {
 
@@ -73,7 +65,6 @@ public class ExternalParser {
 
 
         } catch (NullPointerException e) {
-//            e.printStackTrace();
             return null;
         }
 
@@ -81,11 +72,8 @@ public class ExternalParser {
 
 
     public PriceParserBo priceParse(String text) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
         PriceParseReq body = PriceParseReq.builder().id("money").hasContext(true).query(text).build();
-        HttpEntity<PriceParseReq> entity = new HttpEntity<>(body, headers);
-        JSONObject result = restTemplate.postForObject(parserUrl, entity, JSONObject.class);
+        JSONObject result = doPost(parserUrl, body);
 
         try {
 
@@ -97,7 +85,15 @@ public class ExternalParser {
             int amount = money.get("amount") != null ? (int) money.get("amount") : 0;
             int offset = money.get("offset") != null ? (int) money.get("offset") : 0;
             String range = money.get("range") != null ? (String) money.get("range") : "";
-            List<String> entities = money.getJSONArray("entities").stream().map(e -> (String) e).collect(Collectors.toList());
+
+            List<String> entities = null;
+            if(money.get("entities")!=null) {
+                entities  = money.getJSONArray("entities").stream().map(e -> (String) e).collect(Collectors.toList());
+            }else {
+                entities = new ArrayList<>();
+                String s = Integer.toString(amount);
+                entities.add(s.substring(0,s.length()-2));
+            }
 
             return PriceParserBo.builder()
                     .amount(amount)
@@ -113,12 +109,9 @@ public class ExternalParser {
     }
 
     public List<String> hotelStarParse(String text) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
         HotelStarReq body = new HotelStarReq();
         body.setQuery(text);
-        HttpEntity<HotelStarReq> entity = new HttpEntity<>(body, headers);
-        JSONObject result = restTemplate.postForObject(parserUrl, entity, JSONObject.class);
+        JSONObject result = doPost(parserUrl, body);
 
         try {
             JSONArray jsonArray = result.getJSONArray("informs")
@@ -130,21 +123,16 @@ public class ExternalParser {
             List<String> selects = jsonArray.stream().map(e -> (String) e).collect(Collectors.toList());
             return selects;
         } catch (Exception e) {
-//            e.printStackTrace();
             return null;
         }
 
     }
 
 
-
     public String selectParse(String text,List<String> hotelList) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
         HotelStarReq body = new HotelStarReq(hotelList);
         body.setQuery(text);
-        HttpEntity<HotelStarReq> entity = new HttpEntity<>(body, headers);
-        JSONObject result = restTemplate.postForObject(parserUrl, entity, JSONObject.class);
+        JSONObject result = doPost(parserUrl, body);
 
         try {
             JSONArray jsonArray = result.getJSONArray("informs")
@@ -156,7 +144,6 @@ public class ExternalParser {
             List<String> selects = jsonArray.stream().map(e -> (String) e).collect(Collectors.toList());
             return selects.get(0);
         } catch (Exception e) {
-//            e.printStackTrace();
             return null;
         }
 
@@ -184,10 +171,16 @@ public class ExternalParser {
 
             return answer;
         } catch (Exception e) {
-//            e.printStackTrace();
             return answer;
         }
 
+    }
+
+    public <T> JSONObject doPost(String url, T body){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<T> entity = new HttpEntity<T>(body, headers);
+        return restTemplate.postForObject(url, entity, JSONObject.class);
     }
 
 
