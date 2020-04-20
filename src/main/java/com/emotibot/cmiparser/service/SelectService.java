@@ -40,6 +40,7 @@ public class SelectService {
             List<String> hotelListTmp = innerCache.get(userId).getHotels().stream().map(e -> e.getEntity()).collect(Collectors.toList());
             //对酒店列表做分词处理   "香港喜来登酒店" -> "香港喜来登酒店|香港|喜来登|酒店"
             hotelList = hotelListTmp.stream().map(externalParser::snluParse).collect(Collectors.toList());
+            text = parseText(text);
             String selectedHotelName = externalParser.selectParse(text, hotelList);
 
             if (StringUtils.isEmpty(selectedHotelName)) {
@@ -53,6 +54,21 @@ public class SelectService {
         }
 
         return null;
+    }
+
+    private String parseText(String text) {
+        ArrayList<String> strs = new ArrayList<>();
+        strs.add("就他了");
+        strs.add("就它了");
+        strs.add("就它吧");
+        strs.add("就他吧");
+        strs.add("就这个吧");
+        strs.add("就这个了");
+        strs.add("就这个");
+        if(strs.contains(text)) {
+            text = "第一个";
+        }
+        return text;
     }
 
     private BaseResult getVirtualData(String text) {

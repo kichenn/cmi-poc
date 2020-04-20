@@ -35,6 +35,7 @@ public class HotelViewController {
 
             ArrayList<Answer> answers = new ArrayList<>();
             List<HotelEntity> hotelEntities = hotelViewService.hotelView(userQuery, userId);
+
             if (CollectionUtils.isEmpty(hotelEntities)) {
                 answers.add(Answer.builder().type("text").subType("text").value("抱歉，没有找到符合需求的酒店，请换个条件试试。").build());
             }else{

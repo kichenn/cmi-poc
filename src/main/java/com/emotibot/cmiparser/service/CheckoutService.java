@@ -68,12 +68,7 @@ public class CheckoutService {
                 }
             }
 
-            if(checkoutTime != null) {
-                return updateSlot("checkoutTi",checkoutTime);
-            }else {
-                return BaseResult.ok();
-            }
-
+            return checkoutTime != null ? updateSlot("checkoutTi",checkoutTime) : BaseResult.ok();
 
 
         } catch (Exception e) {

@@ -59,12 +59,8 @@ public class CheckinService {
                 }
             }
 
-            if (checkinTime != null) {
-                return updateSlot("checkinTi", checkinTime);
-            }else {
-                return BaseResult.ok();
-            }
 
+            return checkinTime != null ? updateSlot("checkinTi", checkinTime) : BaseResult.ok();
 
 
         } catch (Exception e) {

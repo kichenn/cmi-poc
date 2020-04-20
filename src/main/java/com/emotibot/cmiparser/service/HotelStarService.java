@@ -39,7 +39,6 @@ public class HotelStarService {
         if(selects==null) {
             return BaseResult.ok();
         }else {
-
             return BaseResult.ok(SlotResponse.build(slotName,String.join(",",selects)));
         }
     }

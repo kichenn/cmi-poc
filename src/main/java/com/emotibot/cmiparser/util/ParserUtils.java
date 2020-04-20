@@ -2,7 +2,6 @@ package com.emotibot.cmiparser.util;
 
 import com.alibaba.fastjson.JSONObject;
 
-import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,15 +22,15 @@ public class ParserUtils {
         return userId;
     }
 
-    public static List<Integer> hotelStarParse(String hotelStars) {
+    public static List<String> hotelStarParse(String hotelStars) {
 
-        ArrayList<Integer> result = new ArrayList<>();
+        ArrayList<String> result = new ArrayList<>();
         String s = PreHandlingUnit.numberTranslator(hotelStars);
         Pattern pattern = Pattern.compile("[1|2|3|4|5]");
         Matcher matcher = pattern.matcher(s);
         while (matcher.find()) {
             String group = matcher.group();
-            result.add(Integer.parseInt(group));
+            result.add(group);
         }
         return result;
     }

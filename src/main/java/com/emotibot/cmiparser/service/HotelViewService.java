@@ -9,10 +9,7 @@ import com.emotibot.cmiparser.util.ParserUtils;
 import com.google.common.cache.LoadingCache;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.search.join.ScoreMode;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchPhraseQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.WildcardQueryBuilder;
+import org.elasticsearch.index.query.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -152,14 +149,9 @@ public class HotelViewService {
                 }
                 Iterable<HotelEntity> search = hotelRepository.search(boolQueryBuilder);
                 search.forEach(hotelEntities2::add);
-            }
 
-            if (!CollectionUtils.isEmpty(hotelEntities1) && !CollectionUtils.isEmpty(hotelEntities2)) {
+                //如果有价格，取交集
                 hotelEntities1.retainAll(hotelEntities2);
-            } else {
-                if (!CollectionUtils.isEmpty(hotelEntities2)) {
-                    hotelEntities1 = hotelEntities2;
-                }
             }
 
 
@@ -191,15 +183,12 @@ public class HotelViewService {
                 }
 
                 if (!StringUtils.isEmpty(userQuery.getHotelStars())) {
-                    List<Integer> stars = ParserUtils.hotelStarParse(userQuery.getHotelStars());
-                    Collections.sort(stars);
-                    int begin = stars.get(0);
-                    int end = stars.get(stars.size() - 1);
+                    List<String> stars = ParserUtils.hotelStarParse(userQuery.getHotelStars());
 
                     boolQueryBuilder.must(QueryBuilders.nestedQuery(
                             "r_float", QueryBuilders.boolQuery().must(
                                     QueryBuilders.termQuery("r_float.attr", "星级"))
-                                    .must(QueryBuilders.rangeQuery("r_float.value_show").gte(begin).lte(end)), ScoreMode.Max));
+                                    .must(QueryBuilders.termsQuery("r_float.value_show",stars)),ScoreMode.Max));
                 }
 
                 //取出套间面积和价格
@@ -223,10 +212,7 @@ public class HotelViewService {
 
             //不会嵌套排序表达式，暂时在外面排序再取10个
             Collections.sort(results);
-            collect = results;
-            if (results.size() > 10) {
-                collect = results.stream().limit(10).collect(Collectors.toList());
-            }
+            collect = results.size() > 10 ?  results.stream().limit(10).collect(Collectors.toList()) : results;
             collect.forEach(e -> {
                 e.setCheckinTime(userQuery.getCheckinTime());
                 e.setCheckoutTime(userQuery.getCheckoutTime());
